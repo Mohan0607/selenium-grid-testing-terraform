@@ -1,8 +1,9 @@
 
 resource "aws_alb" "main" {
-  name            = join("-", [var.resource_name_prefix, "load-balancer"])
-  subnets         = aws_subnet.bastion.*.id
-  security_groups = [aws_security_group.lb.id]
+  name    = join("-", [var.resource_name_prefix, "load-balancer"])
+  subnets = aws_subnet.bastion.*.id
+  security_groups = [aws_security_group.lb.id,
+  aws_security_group.ecs_tasks.id]
 }
 
 resource "aws_alb_target_group" "app" {
