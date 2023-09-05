@@ -35,4 +35,3 @@ resource "aws_cloudwatch_log_stream" "selenium_firefox" {
   name           = "selenium-firefox-log-stream"
   log_group_name = aws_cloudwatch_log_group.selenium_firefox.name
 }
-

@@ -1,13 +1,13 @@
 
-resource "aws_alb" "main" {
-  name    = join("-", [var.resource_name_prefix, "load-balancer"])
+resource "aws_alb" "selenium" {
+  name    = join("-", [var.resource_name_prefix, "alb"])
   subnets = var.public_subnet_ids
   security_groups = [aws_security_group.lb.id,
   aws_security_group.ecs_tasks.id]
 }
 
-resource "aws_alb_target_group" "app" {
-  name        = join("-", [var.resource_name_prefix, "hub-target-group"])
+resource "aws_alb_target_group" "selenium" {
+  name        = join("-", [var.resource_name_prefix, "hub", "tg"])
   port        = 4444
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -26,13 +26,13 @@ resource "aws_alb_target_group" "app" {
 }
 
 # Redirect all traffic from the ALB to the target group
-resource "aws_alb_listener" "front_end" {
-  load_balancer_arn = aws_alb.main.id
+resource "aws_alb_listener" "selenium" {
+  load_balancer_arn = aws_alb.selenium.id
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    target_group_arn = aws_alb_target_group.app.id
+    target_group_arn = aws_alb_target_group.selenium.id
     type             = "forward"
   }
 }

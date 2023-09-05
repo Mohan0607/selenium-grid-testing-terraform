@@ -29,7 +29,6 @@ resource "aws_security_group" "lb" {
     to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
   egress {
     protocol  = "tcp"
     from_port = 4444
@@ -75,7 +74,6 @@ resource "aws_security_group" "ecs_tasks" {
     to_port   = 4444
     self      = true
   }
-  
   egress {
     protocol    = "-1"
     from_port   = 0
