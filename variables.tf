@@ -39,21 +39,36 @@ variable "fargate_memory" {
   default     = "2048"
 }
 
-variable "vpc_cidr_block" {
+variable "vpc_id" {
   type        = string
-  description = "CIDR block for VPC"
+  description = "The id of a VPC in your AWS account"
+  default     = "vpc-11111111"
 }
-variable "private_egress_subnets_cidr_list" {
-  type        = list(any)
-  description = "CIDR block list for private subnets with internet access"
-  default     = []
+
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "The ids of the public subnet, for the load balancer"
+  default     = ["subnet-11111111", "subnet-2222222"]
 }
-variable "bastion_subnets_cidr_list" {
-  type        = list(any)
-  description = "CIDR block list for bastion subnets"
-  default     = []
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "The ids of the private subnet, for the containers"
+  default     = ["subnet-3333333333"]
 }
 
 variable "resource_name_prefix" {
   description = "Name of the prefix for all resource"
 }
+
+
+# variable "bucket_prefix" {
+#   type        = string
+#   description = "The prefix for the S3 bucket"
+#   default     = "tf-s3-website"
+# }
+# variable "domain_name" {
+#   type        = string
+#   description = "The domain name to use"
+#   default     = "demo.hands-on-cloud.com"
+# }

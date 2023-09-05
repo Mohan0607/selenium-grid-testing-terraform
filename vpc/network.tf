@@ -43,7 +43,9 @@ resource "aws_subnet" "bastion" {
   count             = length(var.bastion_subnets_cidr_list)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   cidr_block        = var.bastion_subnets_cidr_list[count.index]
-
+  tags = {
+    "access" = "public"
+  }
   # tags = {
   #   Name = join("-", [var.resource_name_prefix, "bastion", data.aws_availability_zones.available.names[count.index]])
   # }
@@ -78,7 +80,9 @@ resource "aws_subnet" "private_egress" {
   count             = length(var.private_egress_subnets_cidr_list)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   cidr_block        = var.private_egress_subnets_cidr_list[count.index]
-
+  tags = {
+    "access" = "private"
+  }
   # tags = {
   #   Name = join("-", [var.resource_name_prefix, "private-egress", data.aws_availability_zones.available.names[count.index]])
   # }
@@ -104,4 +108,16 @@ resource "aws_route_table_association" "private_egress" {
   subnet_id = aws_subnet.private_egress[count.index].id
 
   route_table_id = aws_route_table.private_egress.id
+}
+
+output "public_subnets" {
+  value = aws_subnet.bastion[*].id
+}
+
+output "Private_subnet" {
+  value = aws_subnet.private_egress[*].id
+}
+
+output "vpc_id" {
+  value = aws_vpc.main.id
 }

@@ -33,7 +33,7 @@ resource "aws_ecs_service" "selenium_hub" {
   scheduling_strategy               = "REPLICA"
   network_configuration {
     security_groups = [aws_security_group.ecs_tasks.id]
-    subnets         = aws_subnet.private_egress[*].id
+    subnets         = var.private_subnet_ids
 
   }
   service_registries {
@@ -81,7 +81,7 @@ resource "aws_ecs_task_definition" "selenium_hub" {
                 "options": {
                     "awslogs-create-group":"true",
                     "awslogs-group": "selenium-hub-log-group",
-                    "awslogs-region": "eu-west-1",
+                    "awslogs-region": "us-west-2",
                     "awslogs-stream-prefix": "hub"
                 }
             }
@@ -89,3 +89,92 @@ resource "aws_ecs_task_definition" "selenium_hub" {
 ]
 DEFINITION
 }
+
+resource "aws_appautoscaling_target" "hub_target" {
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_hub.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  min_capacity       = 1
+  max_capacity       = 3
+}
+
+# Automatically scale capacity up by one
+resource "aws_appautoscaling_policy" "hub_up" {
+  name               = "hub_scale_up"
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_hub.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = 60
+    metric_aggregation_type = "Maximum"
+
+    step_adjustment {
+      metric_interval_lower_bound = 0
+      scaling_adjustment          = 1
+    }
+  }
+
+  depends_on = [aws_appautoscaling_target.hub_target]
+}
+
+# Automatically scale capacity down by one
+resource "aws_appautoscaling_policy" "hub_down" {
+  name               = "hub_scale_down"
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_hub.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = 60
+    metric_aggregation_type = "Maximum"
+
+    step_adjustment {
+      metric_interval_upper_bound = 0
+      scaling_adjustment          = -1
+    }
+  }
+
+  depends_on = [aws_appautoscaling_target.hub_target]
+}
+
+# # CloudWatch alarm that triggers the autoscaling up policy
+# resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
+#   alarm_name          = "cb_cpu_utilization_high"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "85"
+
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.selenium_grid.name
+#     ServiceName = aws_ecs_service.selenium_hub.name
+#   }
+
+#   alarm_actions = [aws_appautoscaling_policy.up.arn]
+# }
+
+# # CloudWatch alarm that triggers the autoscaling down policy
+# resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
+#   alarm_name          = "cb_cpu_utilization_low"
+#   comparison_operator = "LessThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "10"
+
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.selenium_grid.name
+#     ServiceName = aws_ecs_service.selenium_hub.name
+#   }
+
+#   alarm_actions = [aws_appautoscaling_policy.down.arn]
+# }
+

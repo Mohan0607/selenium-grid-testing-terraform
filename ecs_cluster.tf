@@ -1,6 +1,7 @@
 resource "aws_ecs_cluster" "selenium_grid" {
   name = join("-", [var.resource_name_prefix, "selenium-grid-cluster"])
 }
+
 resource "aws_ecs_cluster_capacity_providers" "selenium_grid" {
   cluster_name       = aws_ecs_cluster.selenium_grid.name
   capacity_providers = ["FARGATE"]
@@ -19,7 +20,7 @@ resource "aws_service_discovery_private_dns_namespace" "selenium" {
   #name        = join("-", [var.resource_name_prefix, "selenium-ns"])
   name        = "selenium"
   description = "private DNS for selenium"
-  vpc         = aws_vpc.main.id
+  vpc         = var.vpc_id
 }
 
 resource "aws_service_discovery_service" "hub" {

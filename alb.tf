@@ -1,17 +1,16 @@
 
 resource "aws_alb" "main" {
   name    = join("-", [var.resource_name_prefix, "load-balancer"])
-  subnets = aws_subnet.bastion.*.id
+  subnets = var.public_subnet_ids
   security_groups = [aws_security_group.lb.id,
   aws_security_group.ecs_tasks.id]
 }
 
 resource "aws_alb_target_group" "app" {
-  name = join("-", [var.resource_name_prefix, "hub-target-group"])
-  port = 4444
-  #port= 80
+  name        = join("-", [var.resource_name_prefix, "hub-target-group"])
+  port        = 4444
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
   target_type = "ip"
 
   health_check {
