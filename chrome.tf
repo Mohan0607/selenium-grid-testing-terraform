@@ -81,7 +81,7 @@ resource "aws_ecs_task_definition" "selenium_chrome" {
         }
 ]
 DEFINITION
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "task"])
   }
 }
@@ -159,7 +159,7 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_chrome.name
   }
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "high"])
   }
   alarm_actions = [aws_appautoscaling_policy.up.arn]
@@ -180,7 +180,7 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_chrome.name
   }
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "low"])
   }
   alarm_actions = [aws_appautoscaling_policy.down.arn]

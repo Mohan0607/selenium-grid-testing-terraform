@@ -1,5 +1,5 @@
 locals {
-  seleium_ecs_name_prefix = join("-", [var.resource_name_prefix, "selenium" ])
+  seleium_ecs_name_prefix = join("-", [var.resource_name_prefix, "selenium"])
 
   task_definition = {
     name : "selenium-hub-container",
@@ -48,7 +48,7 @@ resource "aws_ecs_service" "selenium_hub" {
     container_name   = "selenium-hub-container"
     container_port   = 4444
   }
-    tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "service"])
   }
   depends_on = [aws_alb_listener.front_end, aws_iam_role_policy_attachment.ecs_task_execution_role]
@@ -93,7 +93,7 @@ resource "aws_ecs_task_definition" "selenium_hub" {
     }
 ]
 DEFINITION
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "task"])
   }
 }
@@ -126,7 +126,7 @@ resource "aws_appautoscaling_policy" "hub_up" {
       scaling_adjustment          = 1
     }
   }
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "auto-scale-up"])
   }
   depends_on = [aws_appautoscaling_target.hub_target]
@@ -149,7 +149,7 @@ resource "aws_appautoscaling_policy" "hub_down" {
       scaling_adjustment          = -1
     }
   }
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "auto-scale-down"])
   }
   depends_on = [aws_appautoscaling_target.hub_target]
@@ -170,7 +170,7 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_hub.name
   }
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "utilization", "high"])
   }
   alarm_actions = [aws_appautoscaling_policy.hub_up.arn]
@@ -191,7 +191,7 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_hub.name
   }
-tags = {
+  tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "utilization", "low"])
   }
   alarm_actions = [aws_appautoscaling_policy.hub_down.arn]
