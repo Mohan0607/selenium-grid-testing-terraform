@@ -1,3 +1,7 @@
+locals {
+  selenium_role_name = join("-", [var.resource_name_prefix, "ecsTaskExecution"])
+}
+
 # ECS task execution role data
 data "aws_iam_policy_document" "ecs_task_execution_role" {
   version = "2012-10-17"
@@ -13,7 +17,7 @@ data "aws_iam_policy_document" "ecs_task_execution_role" {
   }
 }
 resource "aws_iam_policy" "ecs_execution_policy" {
-  name        = "ecsTaskExecutionPolicy"
+  name = join("-", [local.selenium_role_name, "policy"])
   path        = "/"
   description = "Allows ECS containers to execute commands on our behalf"
 
@@ -40,7 +44,8 @@ EOF
 }
 # ECS task execution role
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = var.ecs_task_execution_role_name
+    name = join("-", [local.selenium_role_name, "role"])
+
   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role.json
 }
 

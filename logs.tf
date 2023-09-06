@@ -1,7 +1,9 @@
-
+locals {
+  cloud_watch_log_name = join("-", [var.var.resource_name_prefix])
+}
 # Set up CloudWatch group and log stream and retain logs for 30 days
 resource "aws_cloudwatch_log_group" "selenium_hub" {
-  name              = "selenium-hub-log-group"
+  name  = join("-", [local.cloud_watch_log_name, "hub", "log-group"])
   retention_in_days = 30
 
   tags = {
@@ -10,28 +12,28 @@ resource "aws_cloudwatch_log_group" "selenium_hub" {
 }
 
 resource "aws_cloudwatch_log_stream" "selenium_hub" {
-  name           = "selenium-hub-log-stream"
+  name  = join("-", [local.cloud_watch_log_name, "hub", "log-stream"])
   log_group_name = aws_cloudwatch_log_group.selenium_hub.name
 }
 
 # Set up CloudWatch group and log stream and retain logs for 30 days
 resource "aws_cloudwatch_log_group" "selenium_chrome" {
-  name              = "selenium-chrome-log-group"
+  name  = join("-", [local.cloud_watch_log_name, "chrome", "log-group"])
   retention_in_days = 30
 }
 
 resource "aws_cloudwatch_log_stream" "selenium_chrome" {
-  name           = "selenium-chrome-log-stream"
+  name  = join("-", [local.cloud_watch_log_name, "chrome", "log-stream"])
   log_group_name = aws_cloudwatch_log_group.selenium_chrome.name
 }
 
 # Set up CloudWatch group and log stream and retain logs for 30 days
 resource "aws_cloudwatch_log_group" "selenium_firefox" {
-  name              = "selenium-firefox-log-group"
+  name  = join("-", [local.cloud_watch_log_name, "firefox", "log-group"])
   retention_in_days = 30
 }
 
 resource "aws_cloudwatch_log_stream" "selenium_firefox" {
-  name           = "selenium-firefox-log-stream"
+  name  = join("-", [local.cloud_watch_log_name, "firefox", "log-stream"])
   log_group_name = aws_cloudwatch_log_group.selenium_firefox.name
 }

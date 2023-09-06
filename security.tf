@@ -1,10 +1,14 @@
+locals {
+  selenium_security_group_name = join("-", [var.resource_name_prefix])
+}
+
 data "aws_vpc" "main" {
   id = var.vpc_id
 }
 
 # ALB Security Group: Edit to restrict access to the application
 resource "aws_security_group" "lb" {
-  name        = "sl-load-balancer-security-group"
+  name = join("-", [local.selenium_security_group_name, "alb-sg"])
   description = "controls access to the ALB"
   vpc_id      = var.vpc_id
 
@@ -45,7 +49,7 @@ resource "aws_security_group" "lb" {
 
 # Traffic to the ECS cluster should only come from the ALB
 resource "aws_security_group" "ecs_tasks" {
-  name        = "sl-ecs-tasks-security-group"
+  name = join("-", [local.selenium_security_group_name, "ecs-tasks-sg"])
   description = "allow inbound access from the ALB only"
   vpc_id      = var.vpc_id
   ingress {

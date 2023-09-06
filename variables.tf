@@ -1,15 +1,10 @@
-# variables.tf
 
 variable "aws_region" {
   description = "The AWS region things are created in"
   default     = "us-west-2"
 }
 
-variable "ecs_task_execution_role_name" {
-  description = "ECS task execution role name"
-  default     = "myEcsTaskExecutionRole"
-}
-
+#  ECS task definitions details
 variable "app_image" {
   description = "Docker image to run in the ECS cluster"
   default     = "selenium/hub:3.141.59"
@@ -39,6 +34,7 @@ variable "fargate_memory" {
   default     = "2048"
 }
 
+# VPC & subnet details
 variable "vpc_id" {
   type        = string
   description = "The id of a VPC in your AWS account"
@@ -61,6 +57,7 @@ variable "resource_name_prefix" {
   description = "Name of the prefix for all resource"
 }
 
+# S3 Bucket 
 
 # variable "bucket_prefix" {
 #   type        = string
