@@ -17,11 +17,17 @@ resource "aws_security_group" "lb" {
   ingress {
     cidr_blocks = [data.aws_vpc.main.cidr_block]
     description = "allow all traffic"
-    from_port   = 4444
+    from_port   = 0
     protocol    = "tcp"
-    to_port     = 4444
+    to_port     = 65535
   }
-
+ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "allow all traffic"
+    from_port   = 0
+    protocol    = "tcp"
+    to_port     = 65535
+  }
   ingress {
     cidr_blocks = [data.aws_vpc.main.cidr_block]
     description = "allow port SSH"
@@ -65,6 +71,13 @@ resource "aws_security_group" "ecs_tasks" {
     to_port     = 65535
   }
   ingress {
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "allow all traffic"
+    from_port   = 0
+    protocol    = "tcp"
+    to_port     = 65535
+  }
+  ingress {
     cidr_blocks = [data.aws_vpc.main.cidr_block]
     description = "allow port SSH"
     from_port   = 22
@@ -83,6 +96,7 @@ resource "aws_security_group" "ecs_tasks" {
     to_port   = 4444
     self      = true
   }
+  
   egress {
     protocol    = "-1"
     from_port   = 0

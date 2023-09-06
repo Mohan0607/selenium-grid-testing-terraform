@@ -44,14 +44,14 @@ resource "aws_ecs_service" "selenium_hub" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app.id
+    target_group_arn = aws_alb_target_group.selenium.id
     container_name   = "selenium-hub-container"
     container_port   = 4444
   }
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "service"])
   }
-  depends_on = [aws_alb_listener.front_end, aws_iam_role_policy_attachment.ecs_task_execution_role]
+  depends_on = [aws_alb_listener.selenium, aws_iam_role_policy_attachment.ecs_task_execution_role]
 
 }
 
@@ -126,9 +126,6 @@ resource "aws_appautoscaling_policy" "hub_up" {
       scaling_adjustment          = 1
     }
   }
-  tags = {
-    Name = join("-", [local.seleium_ecs_name_prefix, "hub", "auto-scale-up"])
-  }
   depends_on = [aws_appautoscaling_target.hub_target]
 }
 
@@ -149,15 +146,12 @@ resource "aws_appautoscaling_policy" "hub_down" {
       scaling_adjustment          = -1
     }
   }
-  tags = {
-    Name = join("-", [local.seleium_ecs_name_prefix, "hub", "auto-scale-down"])
-  }
   depends_on = [aws_appautoscaling_target.hub_target]
 }
 
 # CloudWatch alarm that triggers the autoscaling up policy
-resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
-  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "utilization", "high"])
+resource "aws_cloudwatch_metric_alarm" "hub_service_cpu_high" {
+  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "hub", "utilization", "high"])
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -177,8 +171,8 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
 }
 
 # CloudWatch alarm that triggers the autoscaling down policy
-resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
-  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "utilization", "low"])
+resource "aws_cloudwatch_metric_alarm" "hub_service_cpu_low" {
+  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "hub", "utilization", "low"])
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"

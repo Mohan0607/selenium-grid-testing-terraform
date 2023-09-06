@@ -1,5 +1,5 @@
 locals {
-  cloud_watch_log_name = join("-", [var.var.resource_name_prefix])
+  cloud_watch_log_name = join("-", [var.resource_name_prefix])
 }
 # Set up CloudWatch group and log stream and retain logs for 30 days
 resource "aws_cloudwatch_log_group" "selenium_hub" {

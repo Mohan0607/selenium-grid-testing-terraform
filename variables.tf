@@ -1,7 +1,44 @@
 
-variable "aws_region" {
-  description = "The AWS region things are created in"
-  default     = "us-west-2"
+# Project Configurations and Name Conventions
+variable "region" {
+  type        = string
+  description = "Project Region"
+  default     = "us-west-1"
+}
+
+variable "resource_name_prefix" {
+  type        = string
+  description = "Resource name prefix"
+}
+
+variable "project_resource_administrator" {
+  type        = string
+  description = "Project Resource Administrator"
+  default     = "Avinash Manjunath"
+}
+variable "project_name" {
+  type        = string
+  description = "Project name"
+}
+
+
+# Network Related VPC, Subnets and Security Groups
+variable "vpc_id" {
+  type        = string
+  description = "The id of a VPC in your AWS account"
+  default     = "vpc-11111111"
+}
+
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "The ids of the public subnet, for the load balancer"
+  default     = ["subnet-11111111", "subnet-2222222"]
+}
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "The ids of the private subnet, for the containers"
+  default     = ["subnet-3333333333"]
 }
 
 #  ECS task definitions details
@@ -32,29 +69,6 @@ variable "fargate_cpu" {
 variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
   default     = "2048"
-}
-
-# VPC & subnet details
-variable "vpc_id" {
-  type        = string
-  description = "The id of a VPC in your AWS account"
-  default     = "vpc-11111111"
-}
-
-variable "public_subnet_ids" {
-  type        = list(string)
-  description = "The ids of the public subnet, for the load balancer"
-  default     = ["subnet-11111111", "subnet-2222222"]
-}
-
-variable "private_subnet_ids" {
-  type        = list(string)
-  description = "The ids of the private subnet, for the containers"
-  default     = ["subnet-3333333333"]
-}
-
-variable "resource_name_prefix" {
-  description = "Name of the prefix for all resource"
 }
 
 # S3 Bucket 

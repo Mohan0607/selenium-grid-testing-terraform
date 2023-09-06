@@ -1,6 +1,6 @@
 # Project
 local_aws_profile_name = "default"
-region                 = "us-west-1"
+region                 = "us-west-2"
 
 # Env
 resource_name_prefix = "dxc-selenium"

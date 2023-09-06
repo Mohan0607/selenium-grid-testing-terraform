@@ -1,5 +1,5 @@
 locals {
-  profile = var.local_aws_profile_name
+  profile = "default"
   default_tags = {
     #Environment   = title(var.project_environment)
     CreatedBy     = "Terraform"

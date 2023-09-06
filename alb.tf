@@ -2,8 +2,7 @@
 resource "aws_alb" "selenium" {
   name    = join("-", [var.resource_name_prefix, "alb"])
   subnets = var.public_subnet_ids
-  security_groups = [aws_security_group.lb.id,
-  aws_security_group.ecs_tasks.id]
+  security_groups = [aws_security_group.lb.id, aws_security_group.ecs_tasks.id]
 }
 
 resource "aws_alb_target_group" "selenium" {

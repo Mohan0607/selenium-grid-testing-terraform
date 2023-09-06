@@ -1,6 +1,4 @@
-locals {
-  seleium_ecs_name_prefix = join("-", [var.resource_name_prefix, "chrome", ])
-}
+
 resource "aws_ecs_service" "selenium_chrome" {
   name            = join("-", [local.seleium_ecs_name_prefix, "chrome", "service"])
   cluster         = aws_ecs_cluster.selenium_grid.id
@@ -115,9 +113,6 @@ resource "aws_appautoscaling_policy" "chrome_up" {
       scaling_adjustment          = 3
     }
   }
-  tags = {
-    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "auto-scale-up"])
-  }
   depends_on = [aws_appautoscaling_target.chrome_target]
 }
 
@@ -138,14 +133,12 @@ resource "aws_appautoscaling_policy" "chrome_down" {
       scaling_adjustment          = -1
     }
   }
-  tags = {
-    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "auto-scale-down"])
-  }
+  
   depends_on = [aws_appautoscaling_target.chrome_target]
 }
 
 # CloudWatch alarm that triggers the autoscaling up policy
-resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
+resource "aws_cloudwatch_metric_alarm" "chrome_service_cpu_high" {
   alarm_name          = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "high"])
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -162,11 +155,11 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "high"])
   }
-  alarm_actions = [aws_appautoscaling_policy.up.arn]
+  alarm_actions = [aws_appautoscaling_policy.chrome_up.arn]
 }
 
 # CloudWatch alarm that triggers the autoscaling down policy
-resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
+resource "aws_cloudwatch_metric_alarm" "chrome_service_cpu_low" {
   alarm_name          = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "low"])
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -183,5 +176,5 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "low"])
   }
-  alarm_actions = [aws_appautoscaling_policy.down.arn]
+  alarm_actions = [aws_appautoscaling_policy.chrome_down.arn]
 }
