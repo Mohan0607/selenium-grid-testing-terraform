@@ -1,5 +1,7 @@
 locals {
-  selenium_security_group_name = join("-", [var.resource_name_prefix])
+  selenium_lb_sg_name  = join("-", [var.resource_name_prefix, "lb", "sg"])
+  selenium_ecs_sg_name = join("-", [var.resource_name_prefix, "ecs", "sg"])
+
 }
 
 data "aws_vpc" "main" {
@@ -8,7 +10,7 @@ data "aws_vpc" "main" {
 
 # ALB Security Group: Edit to restrict access to the application
 resource "aws_security_group" "lb" {
-  name = join("-", [local.selenium_security_group_name, "alb-sg"])
+  name        = local.selenium_lb_sg_name
   description = "controls access to the ALB"
   vpc_id      = var.vpc_id
 
@@ -45,11 +47,14 @@ resource "aws_security_group" "lb" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = {
+    Name = local.selenium_lb_sg_name
+  }
 }
 
 # Traffic to the ECS cluster should only come from the ALB
 resource "aws_security_group" "ecs_tasks" {
-  name = join("-", [local.selenium_security_group_name, "ecs-tasks-sg"])
+  name        = local.selenium_ecs_sg_name
   description = "allow inbound access from the ALB only"
   vpc_id      = var.vpc_id
   ingress {
@@ -83,6 +88,9 @@ resource "aws_security_group" "ecs_tasks" {
     from_port   = 0
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = local.selenium_ecs_sg_name
   }
 }
 

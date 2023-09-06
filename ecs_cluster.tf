@@ -1,5 +1,12 @@
+locals {
+  selenium_cluster_name = join("-", [var.resource_name_prefix, "grid", "cluster"])
+}
+
 resource "aws_ecs_cluster" "selenium_grid" {
-  name = join("-", [var.resource_name_prefix, "grid", "cluster"])
+  name = local.selenium_cluster_name
+  tags = {
+    Name = local.selenium_cluster_name
+  }
 }
 
 resource "aws_ecs_cluster_capacity_providers" "selenium_grid" {

@@ -1,6 +1,13 @@
+# Project
+local_aws_profile_name = "default"
+region                 = "us-west-1"
+
 # Env
 resource_name_prefix = "dxc-selenium"
 
+# Tags
+project_resource_administrator = "Avinash Manjunath"
+project_name                   = "Selenium Grid"
 
 vpc_id = "vpc-072ea10fe0bff3c31"
 

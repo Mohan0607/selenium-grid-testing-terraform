@@ -1,8 +1,8 @@
 locals {
-  chrome_node_prefix = join("-", [var.resource_name_prefix, "chrome", ])
+  seleium_ecs_name_prefix = join("-", [var.resource_name_prefix, "chrome", ])
 }
 resource "aws_ecs_service" "selenium_chrome" {
-  name            = join("-", [local.chrome_node_prefix, "node"])
+  name            = join("-", [local.seleium_ecs_name_prefix, "chrome", "service"])
   cluster         = aws_ecs_cluster.selenium_grid.id
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -16,11 +16,13 @@ resource "aws_ecs_service" "selenium_chrome" {
     container_name = "selenium-chrome-container"
   }
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role]
-
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "service"])
+  }
 }
 
 resource "aws_ecs_task_definition" "selenium_chrome" {
-  family                   = join("-", [local.chrome_node_prefix, "node", "task"])
+  family                   = join("-", [local.seleium_ecs_name_prefix, "chrome", "task"])
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -79,6 +81,9 @@ resource "aws_ecs_task_definition" "selenium_chrome" {
         }
 ]
 DEFINITION
+tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "task"])
+  }
 }
 
 
@@ -88,11 +93,14 @@ resource "aws_appautoscaling_target" "chrome_target" {
   scalable_dimension = "ecs:service:DesiredCount"
   min_capacity       = 1
   max_capacity       = 3
+  tags = {
+    Name = join("-", [var.resource_name_prefix, "selenium", "chrome", "auto-target"])
+  }
 }
 
 # Automatically scale capacity up by one
 resource "aws_appautoscaling_policy" "chrome_up" {
-  name               = join("-", [local.chrome_node_prefix, "scale", "up"])
+  name               = join("-", [local.seleium_ecs_name_prefix, "chrome", "scale", "up"])
   service_namespace  = aws_appautoscaling_target.chrome_target.service_namespace
   resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_chrome.name}"
   scalable_dimension = "ecs:service:DesiredCount"
@@ -107,13 +115,15 @@ resource "aws_appautoscaling_policy" "chrome_up" {
       scaling_adjustment          = 3
     }
   }
-
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "auto-scale-up"])
+  }
   depends_on = [aws_appautoscaling_target.chrome_target]
 }
 
 # Automatically scale capacity down by one
 resource "aws_appautoscaling_policy" "chrome_down" {
-  name               = join("-", [local.chrome_node_prefix, "scale", "down"])
+  name               = join("-", [local.seleium_ecs_name_prefix, "chrome", "scale", "down"])
   service_namespace  = aws_appautoscaling_target.chrome_target.service_namespace
   resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_chrome.name}"
   scalable_dimension = "ecs:service:DesiredCount"
@@ -128,13 +138,15 @@ resource "aws_appautoscaling_policy" "chrome_down" {
       scaling_adjustment          = -1
     }
   }
-
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "auto-scale-down"])
+  }
   depends_on = [aws_appautoscaling_target.chrome_target]
 }
 
 # CloudWatch alarm that triggers the autoscaling up policy
 resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
-  alarm_name          = join("-", [local.chrome_node_prefix, "utilization", "high"])
+  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "high"])
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -147,13 +159,15 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_chrome.name
   }
-
+tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "high"])
+  }
   alarm_actions = [aws_appautoscaling_policy.up.arn]
 }
 
 # CloudWatch alarm that triggers the autoscaling down policy
 resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
-  alarm_name          = join("-", [local.chrome_node_prefix, "utilization", "low"])
+  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "low"])
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -166,6 +180,8 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_chrome.name
   }
-
+tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "utilization", "low"])
+  }
   alarm_actions = [aws_appautoscaling_policy.down.arn]
 }

@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "ecs_task_execution_role" {
   }
 }
 resource "aws_iam_policy" "ecs_execution_policy" {
-  name = join("-", [local.selenium_role_name, "policy"])
+  name        = join("-", [local.selenium_role_name, "policy"])
   path        = "/"
   description = "Allows ECS containers to execute commands on our behalf"
 
@@ -44,7 +44,7 @@ EOF
 }
 # ECS task execution role
 resource "aws_iam_role" "ecs_task_execution_role" {
-    name = join("-", [local.selenium_role_name, "role"])
+  name = join("-", [local.selenium_role_name, "role"])
 
   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role.json
 }

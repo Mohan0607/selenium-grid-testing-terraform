@@ -1,8 +1,6 @@
-locals {
-  chrome_node_prefix = join("-", [var.resource_name_prefix, "chrome", ])
-}
+
 resource "aws_ecs_service" "selenium_firefox" {
-  name            = join("-", [var.resource_name_prefix, "firefoxnode"])
+  name            = join("-", [local.seleium_ecs_name_prefix, "firefox", "service"])
   cluster         = aws_ecs_cluster.selenium_grid.id
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -15,9 +13,12 @@ resource "aws_ecs_service" "selenium_firefox" {
     security_groups = [aws_security_group.ecs_tasks.id]
     subnets         = var.private_subnet_ids
   }
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "firefox", "service"])
+  }
 }
 resource "aws_ecs_task_definition" "selenium_firefox" {
-  family                   = join("-", [var.resource_name_prefix, "firefoxnode", "task"])
+  family                   = join("-", [local.seleium_ecs_name_prefix, "firefox", "task"])
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -76,6 +77,9 @@ resource "aws_ecs_task_definition" "selenium_firefox" {
         }
 ]
 DEFINITION
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "firefox", "task"])
+  }
 }
 
 
@@ -85,11 +89,14 @@ resource "aws_appautoscaling_target" "firefox_target" {
   scalable_dimension = "ecs:service:DesiredCount"
   min_capacity       = 1
   max_capacity       = 3
+  tags = {
+    Name = join("-", [var.resource_name_prefix, "selenium", "firefox", "auto-target"])
+  }
 }
 
 # Automatically scale capacity up by one
 resource "aws_appautoscaling_policy" "firefox_up" {
-  name              = join("-", [local.firefox_node_prefix, "scale", "down"])
+  name              = join("-", [local.firefox_node_prefix, "firefox", "scale", "down"])
   service_namespace = aws_appautoscaling_target.firefox_target.service_namespace
 
   resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_firefox.name}"
@@ -105,13 +112,15 @@ resource "aws_appautoscaling_policy" "firefox_up" {
       scaling_adjustment          = 1
     }
   }
-
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "firefox", "auto-scale-up"])
+  }
   depends_on = [aws_appautoscaling_target.firefox_target]
 }
 
 # Automatically scale capacity down by one
 resource "aws_appautoscaling_policy" "firefox_down" {
-  name              = join("-", [local.firefox_node_prefix, "scale", "down"])
+  name              = join("-", [local.firefox_node_prefix, "firefox", "scale", "down"])
   service_namespace = aws_appautoscaling_target.firefox_target.service_namespace
 
   resource_id        = "service/${aws_ecs_cluster.selenium_grid.name}/${aws_ecs_service.selenium_firefox.name}"
@@ -127,13 +136,15 @@ resource "aws_appautoscaling_policy" "firefox_down" {
       scaling_adjustment          = -1
     }
   }
-
+  tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "firefox", "auto-scale-down"])
+  }
   depends_on = [aws_appautoscaling_target.firefox_target]
 }
 
 # CloudWatch alarm that triggers the autoscaling up policy
 resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
-  alarm_name          = join("-", [local.firefox_node_prefix, "utilization", "high"])
+  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "firefox", "utilization", "high"])
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -146,13 +157,15 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_firefox.name
   }
-
+tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "firefox", "utilization", "high"])
+  }
   alarm_actions = [aws_appautoscaling_policy.firefox_up.arn]
 }
 
 # CloudWatch alarm that triggers the autoscaling down policy
 resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
-  alarm_name          = join("-", [local.firefox_node_prefix, "utilization", "low"])
+  alarm_name          = join("-", [local.seleium_ecs_name_prefix, "firefox", "utilization", "low"])
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -165,6 +178,8 @@ resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
     ClusterName = aws_ecs_cluster.selenium_grid.name
     ServiceName = aws_ecs_service.selenium_firefox.name
   }
-
+tags = {
+    Name = join("-", [local.seleium_ecs_name_prefix, "firefox", "utilization", "low"])
+  }
   alarm_actions = [aws_appautoscaling_policy.firefox_down.arn]
 }
