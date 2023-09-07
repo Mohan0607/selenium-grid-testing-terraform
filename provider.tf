@@ -1,5 +1,5 @@
 locals {
-  profile = "default"
+  profile = var.local_aws_profile_name
   default_tags = {
     #Environment   = title(var.project_environment)
     CreatedBy     = "Terraform"
@@ -12,7 +12,7 @@ locals {
 
 # Specify the provider and access details
 provider "aws" {
-  profile = "default"
+  profile = local.profile
   region  = var.region
   default_tags {
     tags = local.default_tags

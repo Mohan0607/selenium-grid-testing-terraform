@@ -68,33 +68,7 @@ resource "aws_ecs_task_definition" "selenium_hub" {
   cpu                      = var.selenium_hub_task_cpu
   memory                   = var.selenium_hub_task_memory
   container_definitions    = jsonencode(concat(local.selenium_hub_container_definition))
-  #   container_definitions = <<DEFINITION
-  # [
-  #    {
-  #         "name": "selenium-hub-container", 
-  #         "image": "selenium/hub:4.11.0", 
-  #         "portMappings": [
-  #             {
-  #             "hostPort": 4444,
-  #             "protocol": "tcp",
-  #             "containerPort": 4444
-  #             }
-  #         ], 
-  #         "essential": true, 
-  #         "entryPoint": [], 
-  #         "command": [],
-  #         "logConfiguration": {
-  #                 "logDriver": "awslogs",
-  #                 "options": {
-  #                     "awslogs-create-group":"true",
-  #                     "awslogs-group": "selenium-hub-log-group",
-  #                     "awslogs-region": "us-west-2",
-  #                     "awslogs-stream-prefix": "hub"
-  #                 }
-  #             }
-  #     }
-  # ]
-  # DEFINITION
+
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "task"])
   }

@@ -1,3 +1,8 @@
+variable "local_aws_profile_name" {
+  type        = string
+  description = "AWS Profile name used in local machine"
+  default     = "default"
+}
 
 # Project Configurations and Name Conventions
 variable "region" {
@@ -41,12 +46,19 @@ variable "private_subnet_ids" {
   default     = ["subnet-3333333333"]
 }
 
-
 #S3 Bucket 
 
 variable "bucket_name" {
   type        = string
   description = "The name for the S3 bucket"
+}
+
+# DNS
+
+
+variable "load_balancer_domain_name" {
+  type        = string
+  description = "Load Balancer Domain name"
 }
 
 variable "selenium_cf_aliases" {

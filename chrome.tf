@@ -57,59 +57,6 @@ resource "aws_ecs_task_definition" "selenium_chrome" {
   memory                   = var.selenium_chrome_task_memory
   container_definitions    = jsonencode(concat(local.selenium_chrome_container_definition))
 
-  #   container_definitions    = <<DEFINITION
-  # [
-  #    {
-  #             "name": "selenium-chrome-container", 
-  #             "image": "selenium/node-chrome:latest", 
-  #             "portMappings": [
-  #                 {
-  #                     "hostPort": 5555,
-  #                     "protocol": "tcp",
-  #                     "containerPort": 5555
-  #                 }
-  #             ],
-  #             "essential": true, 
-  #             "entryPoint": [], 
-  #             "command": [ "/bin/bash", "-c", "PRIVATE=$(curl -s http://169.254.170.2/v2/metadata | jq -r '.Containers[1].Networks[0].IPv4Addresses[0]') ; export REMOTE_HOST=\"http://$PRIVATE:5555\" ; /opt/bin/entry_point.sh" ],
-  #             "environment": [
-  #                 {
-  #                   "name": "SE_EVENT_BUS_HOST",
-  #                   "value": "hub.selenium"
-  #                 },
-  #                 {
-  #                   "name": "HUB_PORT",
-  #                   "value": "4444"
-  #                 },
-  #                 {
-  #                   "name": "SE_EVENT_BUS_PUBLISH_PORT",
-  #                   "value": "4442"
-  #                 },
-  #                 {
-  #                   "name": "SE_EVENT_BUS_SUBSCRIBE_PORT",
-  #                   "value": "4443"
-  #                 },
-  #                 {
-  #                     "name": "NODE_MAX_SESSION",
-  #                     "value": "3"
-  #                 },
-  #                 {
-  #                     "name": "NODE_MAX_INSTANCES",
-  #                     "value": "3"
-  #                 }
-  #             ],
-  #             "logConfiguration": {
-  #                 "logDriver": "awslogs",
-  #                 "options": {
-  #                     "awslogs-create-group":"true",
-  #                     "awslogs-group": "selenium-chrome-log-group",
-  #                     "awslogs-region": "us-west-2",
-  #                     "awslogs-stream-prefix": "chrome"
-  #                 }
-  #             }
-  #         }
-  # ]
-  # DEFINITION
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "task"])
   }

@@ -48,7 +48,7 @@ resource "aws_cloudfront_distribution" "selenium_ui" {
     aws_s3_bucket.selenium
   ]
 
-  #aliases = var.selenium_cf_aliases
+  aliases = var.selenium_cf_aliases
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
@@ -75,7 +75,7 @@ resource "aws_cloudfront_distribution" "selenium_ui" {
 
   viewer_certificate {
     minimum_protocol_version       = "TLSv1.2_2021"
-    #acm_certificate_arn            = var.cloufront_acm_cert_arn
+    acm_certificate_arn            = var.cloufront_acm_cert_arn
     ssl_support_method             = "sni-only"
     cloudfront_default_certificate = true
   }

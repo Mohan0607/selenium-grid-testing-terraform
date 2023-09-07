@@ -1,6 +1,6 @@
 # Project
 local_aws_profile_name = "default"
-region                 = "us-west-2"
+region                 = "us-west-1"
 
 # Env
 resource_name_prefix = "dxc-selenium"
@@ -14,12 +14,18 @@ vpc_id = "vpc-072ea10fe0bff3c31"
 public_subnet_ids  = ["subnet-0840c95936a15f882", "subnet-0c4e0ceb1ff382982"]
 private_subnet_ids = ["subnet-0c51bd6f26b742aca", "subnet-046f874c7f4210565"]
 
+#S3
+
 bucket_name = "portal"
 
+# DNS
+
+load_balancer_domain_name = "selenium.dentalxchange.com"
+
 # Cloud Front
-selenium_cf_aliases      = ["selenium.dentalxchange.com"]
-selenium_portal_domain_name     = "selenium.dentalxchange.com"
-cloufront_acm_cert_arn = "arn:aws:acm:us-east-1:791768447655:certificate/e5593d44-530a-4f40-8a26-5d4098b5a7df"
+selenium_cf_aliases         = ["selenium-portal.dentalxchange.com"]
+selenium_portal_domain_name = "selenium-portal.dentalxchange.com"
+cloufront_acm_cert_arn      = "arn:aws:acm:us-east-1:791768447655:certificate/e5593d44-530a-4f40-8a26-5d4098b5a7df"
 
 # ECS 
 
@@ -34,7 +40,7 @@ selenium_firefox_log_configuration = {
   "options" = {
     "awslogs-create-group"  = "true",
     "awslogs-group"         = "dxc-selenium-firefox-log-group",
-    "awslogs-region"        = "us-west-2",
+    "awslogs-region"        = "us-west-1",
     "awslogs-stream-prefix" = "firefox"
   }
 }
@@ -51,7 +57,7 @@ selenium_chrome_log_configuration = {
   "options" = {
     "awslogs-create-group"  = "true",
     "awslogs-group"         = "dxc-selenium-chrome-log-group",
-    "awslogs-region"        = "us-west-2",
+    "awslogs-region"        = "us-west-1",
     "awslogs-stream-prefix" = "chrome"
   }
 }
@@ -68,7 +74,7 @@ selenium_hub_log_configuration = {
   "options" = {
     "awslogs-create-group"  = "true",
     "awslogs-group"         = "dxc-selenium-hub-log-group",
-    "awslogs-region"        = "us-west-2",
+    "awslogs-region"        = "us-west-1",
     "awslogs-stream-prefix" = "hub"
   }
 }
