@@ -41,45 +41,126 @@ variable "private_subnet_ids" {
   default     = ["subnet-3333333333"]
 }
 
-#  ECS task definitions details
-variable "app_image" {
-  description = "Docker image to run in the ECS cluster"
-  default     = "selenium/hub:3.141.59"
+
+#S3 Bucket 
+
+variable "bucket_name" {
+  type        = string
+  description = "The name for the S3 bucket"
 }
 
-variable "app_port" {
-  description = "Port exposed by the docker image to redirect traffic to"
-  default     = 4444
+variable "selenium_cf_aliases" {
+  type        = list(string)
+  description = "List of aliases used for the portal UI"
 }
 
-# variable "app_count" {
-#   description = "Number of docker containers to run"
-#   default     = 3
-# }
-
-variable "health_check_path" {
-  default = "/"
+variable "cloufront_acm_cert_arn" {
+  type        = string
+  description = "ARN of the aws certificate manager used for the cloudfront"
 }
 
-variable "fargate_cpu" {
-  description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-  default     = "1024"
+variable "selenium_portal_domain_name" {
+  type        = string
+  description = "Domain name for the Report portal UI"
 }
 
-variable "fargate_memory" {
-  description = "Fargate instance memory to provision (in MiB)"
-  default     = "2048"
+# ECS Fire Fox task defintions
+
+variable "selenium_firefox_service_desired_count" {
+  type        = string
+  description = "Number of instances for Fire Fox Node"
+}
+variable "selenium_firefox_image" {
+  type        = string
+  description = "Image Url for Fire Fox Node image"
+}
+variable "selenium_firefox_task_memory" {
+  type        = number
+  description = "The memory allocated to the Fire Fox Node task "
 }
 
-# S3 Bucket 
+variable "selenium_firefox_container_cpu" {
+  type        = number
+  description = "The CPU units allocated to the Fire Fox Node container."
+}
 
-# variable "bucket_prefix" {
-#   type        = string
-#   description = "The prefix for the S3 bucket"
-#   default     = "tf-s3-website"
-# }
-# variable "domain_name" {
-#   type        = string
-#   description = "The domain name to use"
-#   default     = "demo.hands-on-cloud.com"
-# }
+variable "selenium_firefox_container_memory" {
+  type        = number
+  description = "The memory allocated to the Fire Fox Node container "
+}
+variable "selenium_firefox_log_configuration" {
+  type        = any
+  description = "The log configuration for the Fire Fox Node container."
+}
+variable "selenium_firefox_task_cpu" {
+  type        = number
+  description = "The CPU units allocated to the Fire Fox Node task."
+}
+
+# ECS Chrome task defintions
+
+
+variable "selenium_chrome_service_desired_count" {
+  type        = string
+  description = "Number of instances for Chrome Node"
+}
+variable "selenium_chrome_image" {
+  type        = string
+  description = "Image Url for Chrome Node image"
+}
+variable "selenium_chrome_task_memory" {
+  type        = number
+  description = "The memory allocated to the Chrome Node task "
+}
+
+variable "selenium_chrome_container_cpu" {
+  type        = number
+  description = "The CPU units allocated to the Chrome Node container."
+}
+
+variable "selenium_chrome_container_memory" {
+  type        = number
+  description = "The memory allocated to the Chrome Node container "
+}
+variable "selenium_chrome_log_configuration" {
+  type        = any
+  description = "The log configuration for the Chrome Node container."
+}
+variable "selenium_chrome_task_cpu" {
+  type        = number
+  description = "The CPU units allocated to the Chrome Node task."
+}
+
+# ECS Hub task defintions
+
+
+variable "selenium_hub_service_desired_count" {
+  type        = string
+  description = "Number of instances for hub Node"
+}
+variable "selenium_hub_image" {
+  type        = string
+  description = "Image Url for hub Node image"
+}
+variable "selenium_hub_task_memory" {
+  type        = number
+  description = "The memory allocated to the hub Node task "
+}
+
+variable "selenium_hub_container_cpu" {
+  type        = number
+  description = "The CPU units allocated to the hub Node container."
+}
+
+variable "selenium_hub_container_memory" {
+  type        = number
+  description = "The memory allocated to the hub Node container "
+}
+variable "selenium_hub_log_configuration" {
+  type        = any
+  description = "The log configuration for the hub Node container."
+}
+variable "selenium_hub_task_cpu" {
+  type        = number
+  description = "The CPU units allocated to the hub Node task."
+}

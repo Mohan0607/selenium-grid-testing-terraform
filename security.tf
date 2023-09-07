@@ -21,7 +21,7 @@ resource "aws_security_group" "lb" {
     protocol    = "tcp"
     to_port     = 65535
   }
-ingress {
+  ingress {
     cidr_blocks = ["0.0.0.0/0"]
     description = "allow all traffic"
     from_port   = 0
@@ -96,7 +96,7 @@ resource "aws_security_group" "ecs_tasks" {
     to_port   = 4444
     self      = true
   }
-  
+
   egress {
     protocol    = "-1"
     from_port   = 0

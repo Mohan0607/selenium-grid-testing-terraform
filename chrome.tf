@@ -1,3 +1,32 @@
+locals {
+  selenium_chrome_container_port = 5555
+  selenium_chrome_container_name = "selenium-chrome-container"
+  selenium_chrome_envs           = concat(local.node_environments)
+
+  selenium_chrome_container_definition = [
+    {
+      name         = local.selenium_chrome_container_name
+      image        = var.selenium_chrome_image
+      memory       = var.selenium_chrome_container_memory
+      cpu          = var.selenium_chrome_container_cpu
+      essential    = true
+      command      = ["/bin/bash", "-c", "PRIVATE=$(curl -s http://169.254.170.2/v2/metadata | jq -r '.Containers[1].Networks[0].IPv4Addresses[0]') ; export REMOTE_HOST=\"http://$PRIVATE:5555\" ; /opt/bin/entry_point.sh"]
+      entryPoint   = []
+      mountPoints  = []
+      volumesFrom  = []
+      portMappings = []
+      environment  = local.selenium_chrome_envs
+      portMappings = [
+        {
+          containerPort = local.selenium_chrome_container_port
+          hostPort      = local.selenium_chrome_container_port
+          protocol      = "tcp"
+        }
+      ]
+      logConfiguration = var.selenium_chrome_log_configuration
+  }]
+
+}
 
 resource "aws_ecs_service" "selenium_chrome" {
   name            = join("-", [local.seleium_ecs_name_prefix, "chrome", "service"])
@@ -11,7 +40,7 @@ resource "aws_ecs_service" "selenium_chrome" {
   }
   service_registries {
     registry_arn   = aws_service_discovery_service.hub.arn
-    container_name = "selenium-chrome-container"
+    container_name = local.selenium_chrome_container_name
   }
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role]
   tags = {
@@ -24,61 +53,63 @@ resource "aws_ecs_task_definition" "selenium_chrome" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "1024"
-  memory                   = "2048"
-  container_definitions    = <<DEFINITION
-[
-   {
-            "name": "selenium-chrome-container", 
-            "image": "selenium/node-chrome:latest", 
-            "portMappings": [
-                {
-                    "hostPort": 5555,
-                    "protocol": "tcp",
-                    "containerPort": 5555
-                }
-            ],
-            "essential": true, 
-            "entryPoint": [], 
-            "command": [ "/bin/bash", "-c", "PRIVATE=$(curl -s http://169.254.170.2/v2/metadata | jq -r '.Containers[1].Networks[0].IPv4Addresses[0]') ; export REMOTE_HOST=\"http://$PRIVATE:5555\" ; /opt/bin/entry_point.sh" ],
-            "environment": [
-                {
-                  "name": "SE_EVENT_BUS_HOST",
-                  "value": "hub.selenium"
-                },
-                {
-                  "name": "HUB_PORT",
-                  "value": "4444"
-                },
-                {
-                  "name": "SE_EVENT_BUS_PUBLISH_PORT",
-                  "value": "4442"
-                },
-                {
-                  "name": "SE_EVENT_BUS_SUBSCRIBE_PORT",
-                  "value": "4443"
-                },
-                {
-                    "name": "NODE_MAX_SESSION",
-                    "value": "3"
-                },
-                {
-                    "name": "NODE_MAX_INSTANCES",
-                    "value": "3"
-                }
-            ],
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-create-group":"true",
-                    "awslogs-group": "selenium-chrome-log-group",
-                    "awslogs-region": "us-west-2",
-                    "awslogs-stream-prefix": "chrome"
-                }
-            }
-        }
-]
-DEFINITION
+  cpu                      = var.selenium_chrome_task_cpu
+  memory                   = var.selenium_chrome_task_memory
+  container_definitions    = jsonencode(concat(local.selenium_chrome_container_definition))
+
+  #   container_definitions    = <<DEFINITION
+  # [
+  #    {
+  #             "name": "selenium-chrome-container", 
+  #             "image": "selenium/node-chrome:latest", 
+  #             "portMappings": [
+  #                 {
+  #                     "hostPort": 5555,
+  #                     "protocol": "tcp",
+  #                     "containerPort": 5555
+  #                 }
+  #             ],
+  #             "essential": true, 
+  #             "entryPoint": [], 
+  #             "command": [ "/bin/bash", "-c", "PRIVATE=$(curl -s http://169.254.170.2/v2/metadata | jq -r '.Containers[1].Networks[0].IPv4Addresses[0]') ; export REMOTE_HOST=\"http://$PRIVATE:5555\" ; /opt/bin/entry_point.sh" ],
+  #             "environment": [
+  #                 {
+  #                   "name": "SE_EVENT_BUS_HOST",
+  #                   "value": "hub.selenium"
+  #                 },
+  #                 {
+  #                   "name": "HUB_PORT",
+  #                   "value": "4444"
+  #                 },
+  #                 {
+  #                   "name": "SE_EVENT_BUS_PUBLISH_PORT",
+  #                   "value": "4442"
+  #                 },
+  #                 {
+  #                   "name": "SE_EVENT_BUS_SUBSCRIBE_PORT",
+  #                   "value": "4443"
+  #                 },
+  #                 {
+  #                     "name": "NODE_MAX_SESSION",
+  #                     "value": "3"
+  #                 },
+  #                 {
+  #                     "name": "NODE_MAX_INSTANCES",
+  #                     "value": "3"
+  #                 }
+  #             ],
+  #             "logConfiguration": {
+  #                 "logDriver": "awslogs",
+  #                 "options": {
+  #                     "awslogs-create-group":"true",
+  #                     "awslogs-group": "selenium-chrome-log-group",
+  #                     "awslogs-region": "us-west-2",
+  #                     "awslogs-stream-prefix": "chrome"
+  #                 }
+  #             }
+  #         }
+  # ]
+  # DEFINITION
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "chrome", "task"])
   }
@@ -133,7 +164,7 @@ resource "aws_appautoscaling_policy" "chrome_down" {
       scaling_adjustment          = -1
     }
   }
-  
+
   depends_on = [aws_appautoscaling_target.chrome_target]
 }
 

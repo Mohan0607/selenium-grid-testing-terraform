@@ -1,27 +1,32 @@
 locals {
   seleium_ecs_name_prefix = join("-", [var.resource_name_prefix, "selenium"])
 
-  task_definition = {
-    name : "selenium-hub-container",
-    image : "selenium/hub:4.11.0",
-    cpu : 1024
-    memory : 2048,
-    networkMode : "awsvpc",
-    logConfiguration : {
-      logDriver : "awslogs",
-      options : {
-        "awslogs-group" : "selenium-hub-log-group",
-        "awslogs-region" : "us-west-2",
-        "awslogs-stream-prefix" : "hub",
-      }
-    },
-    portMappings : [
-      {
-        containerPort : 4444,
-        hostPort : 4444
-      }
-    ]
-  }
+  selenium_hub_container_port = 4444
+  selenium_hub_container_name = "selenium-hub-container"
+
+  selenium_hub_container_definition = [
+    {
+      name         = local.selenium_hub_container_name
+      image        = var.selenium_hub_image
+      memory       = var.selenium_hub_container_memory
+      cpu          = var.selenium_hub_container_cpu
+      essential    = true
+      command      = []
+      entryPoint   = []
+      mountPoints  = []
+      volumesFrom  = []
+      portMappings = []
+      environment  = []
+      portMappings = [
+        {
+          containerPort = local.selenium_hub_container_port
+          hostPort      = local.selenium_hub_container_port
+          protocol      = "tcp"
+        }
+      ]
+      logConfiguration = var.selenium_hub_log_configuration
+  }]
+
 }
 
 resource "aws_ecs_service" "selenium_hub" {
@@ -40,13 +45,13 @@ resource "aws_ecs_service" "selenium_hub" {
   }
   service_registries {
     registry_arn   = aws_service_discovery_service.hub.arn
-    container_name = "selenium-hub-container"
+    container_name = local.selenium_hub_container_name
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.selenium.id
-    container_name   = "selenium-hub-container"
-    container_port   = 4444
+    target_group_arn = aws_alb_target_group.selenium.arn
+    container_name   = local.selenium_hub_container_name
+    container_port   = local.selenium_hub_container_port
   }
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "service"])
@@ -56,43 +61,40 @@ resource "aws_ecs_service" "selenium_hub" {
 }
 
 resource "aws_ecs_task_definition" "selenium_hub" {
-  #container_definitions    = data.template_file.cb_app.rendered
-  #container_definitions = "[{\"name\":\"selenium-hub-container\",\"image\":\"selenium/hub:4.11.0\",\"cpu\":1024,\"memory\":2048,\"links\":[],\"portMappings\":[{\"containerPort\":4444,\"hostPort\":4444,\"protocol\":\"tcp\"},{\"containerPort\":5555,\"hostPort\":5555,\"protocol\":\"tcp\"},{\"containerPort\":4443,\"hostPort\":4443,\"protocol\":\"tcp\"},{\"containerPort\":4442,\"hostPort\":4442,\"protocol\":\"tcp\"}],\"essential\":true,\"entryPoint\":[],\"command\":[],\"environment\":[{\"name\":\"SE_OPTS\",\"value\":\"--log-level FINE\"}],\"environmentFiles\":[],\"mountPoints\":[],\"volumesFrom\":[],\"secrets\":[],\"dnsServers\":[],\"dnsSearchDomains\":[],\"extraHosts\":[],\"dockerSecurityOptions\":[],\"dockerLabels\":{},\"ulimits\":[],\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"ecs-app\",\"awslogs-region\":\"us-west-1\",\"awslogs-stream-prefix\":\"cb-log-stream\"},\"secretOptions\":[]},\"systemControls\":[]}]"
-  family             = join("-", [local.seleium_ecs_name_prefix, "hub", "task"])
-  execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  network_mode       = "awsvpc"
-  requires_compatibilities = [
-    "FARGATE"
-  ]
-  cpu                   = "1024"
-  memory                = "2048"
-  container_definitions = <<DEFINITION
-[
-   {
-        "name": "selenium-hub-container", 
-        "image": "selenium/hub:4.11.0", 
-        "portMappings": [
-            {
-            "hostPort": 4444,
-            "protocol": "tcp",
-            "containerPort": 4444
-            }
-        ], 
-        "essential": true, 
-        "entryPoint": [], 
-        "command": [],
-        "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-create-group":"true",
-                    "awslogs-group": "selenium-hub-log-group",
-                    "awslogs-region": "us-west-2",
-                    "awslogs-stream-prefix": "hub"
-                }
-            }
-    }
-]
-DEFINITION
+  family                   = join("-", [local.seleium_ecs_name_prefix, "hub", "task"])
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.selenium_hub_task_cpu
+  memory                   = var.selenium_hub_task_memory
+  container_definitions    = jsonencode(concat(local.selenium_hub_container_definition))
+  #   container_definitions = <<DEFINITION
+  # [
+  #    {
+  #         "name": "selenium-hub-container", 
+  #         "image": "selenium/hub:4.11.0", 
+  #         "portMappings": [
+  #             {
+  #             "hostPort": 4444,
+  #             "protocol": "tcp",
+  #             "containerPort": 4444
+  #             }
+  #         ], 
+  #         "essential": true, 
+  #         "entryPoint": [], 
+  #         "command": [],
+  #         "logConfiguration": {
+  #                 "logDriver": "awslogs",
+  #                 "options": {
+  #                     "awslogs-create-group":"true",
+  #                     "awslogs-group": "selenium-hub-log-group",
+  #                     "awslogs-region": "us-west-2",
+  #                     "awslogs-stream-prefix": "hub"
+  #                 }
+  #             }
+  #     }
+  # ]
+  # DEFINITION
   tags = {
     Name = join("-", [local.seleium_ecs_name_prefix, "hub", "task"])
   }
