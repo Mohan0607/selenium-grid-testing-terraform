@@ -4,6 +4,9 @@ locals {
 
 resource "aws_ecs_cluster" "selenium_grid" {
   name = local.selenium_cluster_name
+  service_connect_defaults {
+    namespace = aws_service_discovery_http_namespace.selenium.arn
+  }
   tags = {
     Name = local.selenium_cluster_name
   }
@@ -21,27 +24,10 @@ resource "aws_ecs_cluster_capacity_providers" "selenium_grid" {
 
 }
 
-## Service Discovery (AWS Cloud Map) for a private DNS, so containers can find each other
+# Service Discovery (AWS Cloud Map) for a private DNS, so containers can find each other
 
-resource "aws_service_discovery_private_dns_namespace" "selenium" {
-  #name        = join("-", [var.resource_name_prefix, "dns"])
+resource "aws_service_discovery_http_namespace" "selenium" {
+  #name = join("-", [var.resource_name_prefix])
   name        = "selenium"
-  description = "private DNS for selenium"
-  vpc         = var.vpc_id
-}
-
-resource "aws_service_discovery_service" "hub" {
-  #name = join("-", [var.resource_name_prefix, "dns", "hub"])
-  name = "hub"
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.selenium.id
-    dns_records {
-      ttl  = 60
-      type = "A"
-    }
-  }
-
-  health_check_custom_config {
-    failure_threshold = 1
-  }
+  description = "Service Discovery for selenium"
 }

@@ -1,6 +1,6 @@
 
 resource "aws_alb" "selenium" {
-  name            = join("-", [var.resource_name_prefix, "alb"])
+  name            = join("-", [var.resource_name_prefix, "grid", "alb"])
   subnets         = var.public_subnet_ids
   security_groups = [aws_security_group.lb.id, aws_security_group.ecs_tasks.id]
 }
@@ -30,28 +30,29 @@ resource "aws_alb_listener" "selenium" {
   port              = 80
   protocol          = "HTTP"
   default_action {
-    type = "redirect"
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-}
-
-# Redirect all traffic from the ALB to the target group
-resource "aws_alb_listener" "selenium_ssl" {
-  load_balancer_arn = aws_alb.selenium.id
-  port              = 443
-  protocol          = "HTTPS"
-  certificate_arn   = data.aws_acm_certificate.selenium_ssl.arn
-  default_action {
     target_group_arn = aws_alb_target_group.selenium.arn
     type             = "forward"
   }
-
+  # default_action {
+  #   type = "redirect"
+  #   redirect {
+  #     port        = "443"
+  #     protocol    = "HTTPS"
+  #     status_code = "HTTP_301"
+  #   }
+  #}
 }
 
-data "aws_acm_certificate" "selenium_ssl" {
-  domain = "*.dentalxchange.com"
-}
+# # Redirect all traffic from the ALB to the target group
+# resource "aws_alb_listener" "selenium_ssl" {
+#   load_balancer_arn = aws_alb.selenium.id
+#   port              = 443
+#   protocol          = "HTTPS"
+#   certificate_arn   = data.aws_acm_certificate.selenium_ssl.arn
+#   default_action {
+#     target_group_arn = aws_alb_target_group.selenium.arn
+#     type             = "forward"
+#   }
+
+# }
+

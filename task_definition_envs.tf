@@ -3,11 +3,7 @@ locals {
   node_environments = [
     {
       "name" : "SE_EVENT_BUS_HOST",
-      "value" : "hub.selenium"
-    },
-    {
-      "name" : "HUB_PORT",
-      "value" : tostring(local.selenium_hub_container_port)
+      "value" : local.dns_name
     },
     {
       "name" : "SE_EVENT_BUS_PUBLISH_PORT",
@@ -24,6 +20,10 @@ locals {
     {
       "name" : "NODE_MAX_INSTANCES",
       "value" : "3"
+    },
+    {
+      "name" : "SE_OPTS",
+      "value" : "--log-level FINE"
     }
   ]
 

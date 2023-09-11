@@ -25,8 +25,6 @@ variable "project_name" {
   type        = string
   description = "Project name"
 }
-
-
 # Network Related VPC, Subnets and Security Groups
 variable "vpc_id" {
   type        = string
@@ -54,7 +52,6 @@ variable "bucket_name" {
 }
 
 # DNS
-
 
 variable "load_balancer_domain_name" {
   type        = string
@@ -111,7 +108,6 @@ variable "selenium_firefox_task_cpu" {
 
 # ECS Chrome task defintions
 
-
 variable "selenium_chrome_service_desired_count" {
   type        = string
   description = "Number of instances for Chrome Node"
@@ -144,7 +140,6 @@ variable "selenium_chrome_task_cpu" {
 }
 
 # ECS Hub task defintions
-
 
 variable "selenium_hub_service_desired_count" {
   type        = string

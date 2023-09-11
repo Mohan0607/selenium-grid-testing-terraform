@@ -1,9 +1,9 @@
 # Project
 local_aws_profile_name = "default"
-region                 = "us-west-1"
+region                 = "us-west-2"
 
 # Env
-resource_name_prefix = "dxc-selenium"
+resource_name_prefix = "dentalx-selenium"
 
 # Tags
 project_resource_administrator = "Avinash Manjunath"
@@ -23,11 +23,12 @@ bucket_name = "portal"
 load_balancer_domain_name = "selenium.dentalxchange.com"
 
 # Cloud Front
-selenium_cf_aliases         = ["selenium-portal.dentalxchange.com"]
-selenium_portal_domain_name = "selenium-portal.dentalxchange.com"
+
+selenium_cf_aliases         = ["selenium.dentalxchange.com"]
+selenium_portal_domain_name = "selenium.dentalxchange.com"
 cloufront_acm_cert_arn      = "arn:aws:acm:us-east-1:791768447655:certificate/e5593d44-530a-4f40-8a26-5d4098b5a7df"
 
-# ECS 
+# ECS Firefox Task Definitions
 
 selenium_firefox_image                 = "selenium/node-firefox:4.11.0"
 selenium_firefox_task_cpu              = 1024
@@ -40,11 +41,12 @@ selenium_firefox_log_configuration = {
   "options" = {
     "awslogs-create-group"  = "true",
     "awslogs-group"         = "dxc-selenium-firefox-log-group",
-    "awslogs-region"        = "us-west-1",
+    "awslogs-region"        = "us-west-2",
     "awslogs-stream-prefix" = "firefox"
   }
 }
 
+# ECS Chrome Task Definitions
 
 selenium_chrome_image                 = "selenium/node-chrome:4.11.0"
 selenium_chrome_task_cpu              = 1024
@@ -57,11 +59,12 @@ selenium_chrome_log_configuration = {
   "options" = {
     "awslogs-create-group"  = "true",
     "awslogs-group"         = "dxc-selenium-chrome-log-group",
-    "awslogs-region"        = "us-west-1",
+    "awslogs-region"        = "us-west-2",
     "awslogs-stream-prefix" = "chrome"
   }
 }
 
+# ECS Hub Task Definitions
 
 selenium_hub_image                 = "selenium/hub:4.11.0"
 selenium_hub_task_cpu              = 1024
@@ -74,7 +77,7 @@ selenium_hub_log_configuration = {
   "options" = {
     "awslogs-create-group"  = "true",
     "awslogs-group"         = "dxc-selenium-hub-log-group",
-    "awslogs-region"        = "us-west-1",
+    "awslogs-region"        = "us-west-2",
     "awslogs-stream-prefix" = "hub"
   }
 }

@@ -1,3 +1,6 @@
+locals {
+  vpc_name = var.resource_name_prefix
+}
 # Fetch AZs in the current region
 data "aws_availability_zones" "available" {
 }
@@ -5,17 +8,14 @@ data "aws_availability_zones" "available" {
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_hostnames = true
-  # tags = {
-  #   Name = local.vpc_name
-  # }
+  tags = {
+    Name = local.vpc_name
+  }
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
-  # tags = {
-  #   Name = local.igw_name
-  # }
 }
 
 
@@ -24,10 +24,6 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.bastion[0].id
 
   depends_on = [aws_internet_gateway.main]
-
-  # tags = {
-  #   Name = local.nat_gw_name
-  # }
 
 }
 
@@ -43,21 +39,16 @@ resource "aws_subnet" "bastion" {
   count             = length(var.bastion_subnets_cidr_list)
   availability_zone = data.aws_availability_zones.available.names[count.index]
   cidr_block        = var.bastion_subnets_cidr_list[count.index]
+
   tags = {
-    "access" = "public"
+    Name = join("-", [var.resource_name_prefix, "bastion", data.aws_availability_zones.available.names[count.index]])
   }
-  # tags = {
-  #   Name = join("-", [var.resource_name_prefix, "bastion", data.aws_availability_zones.available.names[count.index]])
-  # }
 }
 
 
 resource "aws_route_table" "bastion" {
   vpc_id = aws_vpc.main.id
 
-  # tags = {
-  #   Name = local.bastion_rtb_name
-  # }
 }
 
 resource "aws_route" "bastion_internet" {
@@ -81,20 +72,15 @@ resource "aws_subnet" "private_egress" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
   cidr_block        = var.private_egress_subnets_cidr_list[count.index]
   tags = {
-    "access" = "private"
+    Name = join("-", [var.resource_name_prefix, "private-egress", data.aws_availability_zones.available.names[count.index]])
   }
-  # tags = {
-  #   Name = join("-", [var.resource_name_prefix, "private-egress", data.aws_availability_zones.available.names[count.index]])
-  # }
 }
 
 
 resource "aws_route_table" "private_egress" {
   vpc_id = aws_vpc.main.id
 
-  # tags = {
-  #   Name = local.private_egress_rtb_name
-  # }
+  
 }
 
 resource "aws_route" "private_nat" {
@@ -110,14 +96,3 @@ resource "aws_route_table_association" "private_egress" {
   route_table_id = aws_route_table.private_egress.id
 }
 
-output "public_subnets" {
-  value = aws_subnet.bastion[*].id
-}
-
-output "Private_subnet" {
-  value = aws_subnet.private_egress[*].id
-}
-
-output "vpc_id" {
-  value = aws_vpc.main.id
-}

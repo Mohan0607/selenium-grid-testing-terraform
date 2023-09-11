@@ -2,7 +2,7 @@ locals {
   profile = var.local_aws_profile_name
   default_tags = {
     #Environment   = title(var.project_environment)
-    CreatedBy     = "Terraform"
+    #CreatedBy     = "Terraform"
     Terraform     = "True"
     Department    = "Engineering"
     Administrator = title(var.project_resource_administrator)
